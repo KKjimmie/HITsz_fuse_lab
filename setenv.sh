@@ -9,20 +9,30 @@ PROJECT_NAME=""
 #===================================
 function install_driver() {
     current_user=$(whoami)
-
     # 测试是否有SUDO权限
     if [ "$current_user" != "root" ]; then
         has_root_permission=$(sudo -l -U "$current_user" | grep "(root) ALL")
         if [ -n "$has_root_permission" ]; then
             if command -v apt-get > /dev/null 2>&1; then
+                echo "> apt install"
                 sudo apt-get install make cmake fuse libfuse-dev
             else 
+                echo "> yum install"
                 sudo yum install make cmake fuse fuse-devel 
             fi 
         else
             echo "警告：没有包被安装，如果是校内远程计算节点，请忽略"
         fi
+    else 
+        if command -v apt-get > /dev/null 2>&1; then
+            echo "> apt install"
+            sudo apt-get install make cmake fuse libfuse-dev
+        else 
+            echo "> yum install"
+            sudo yum install make cmake fuse fuse-devel 
+        fi
     fi
+    
     
     cd $DRIVER_DIR || exit
     ./ddriver.sh -i u           
