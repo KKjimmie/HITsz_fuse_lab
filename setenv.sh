@@ -33,7 +33,6 @@ function install_driver() {
         fi
     fi
     
-    
     cd $DRIVER_DIR || exit
     ./ddriver.sh -i u           
     ./ddriver.sh -h
