@@ -13,16 +13,6 @@ function check_touch () {
     return 0
 }
 
-function mkdir_and_check () {
-    DIR=$1
-    if [ ! -d "$DIR" ]; then
-        mkdir "$DIR"
-        if ! stat "$DIR" > /dev/null; then
-            fail "$TEST_CASE: 目录$DIR创建失败, 请确保能够通过mkdir测试"
-        fi
-    fi
-}
-
 try_mount_or_fail
 
 TEST_CASE="case 3.1 - touch ${MNTPOINT}/file0"

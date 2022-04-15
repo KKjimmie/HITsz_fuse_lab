@@ -535,7 +535,7 @@ int sfs_mount(struct custom_options options){
         sfs_super_d.data_offset = sfs_super_d.map_inode_offset + SFS_BLKS_SZ(map_inode_blks);
         sfs_super_d.map_inode_blks  = map_inode_blks;
         sfs_super_d.sz_usage    = 0;
-
+        SFS_DBG("inode map blocks: %d\n", map_inode_blks);
         is_init = TRUE;
     }
     sfs_super.sz_usage   = sfs_super_d.sz_usage;      /* 建立 in-memory 结构 */

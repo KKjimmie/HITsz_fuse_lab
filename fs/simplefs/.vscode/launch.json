@@ -5,6 +5,25 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "check bitmap: 当前文件",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "check bitmap python: 传参数",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "args": [
+                "-l", "/home/Programming/user-land-filesystem/fs/simplefs/include/sfs.layout", "-r", "/home/Programming/user-land-filesystem/fs/simplefs/tests/checkbm/golden-sfs.json"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             "name": "gcc - 生成和调试活动文件",
             "type": "cppdbg",
             "request": "launch",

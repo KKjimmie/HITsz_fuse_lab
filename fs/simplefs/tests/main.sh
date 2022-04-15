@@ -3,10 +3,25 @@ POINTS=0
 TOTAL_POINTS=0
 TEST_CASES=(mount.sh mkdir.sh touch.sh ls.sh remount.sh)
 # mount.sh mkdir.sh touch.sh ls.sh remount.sh (read.sh write.sh cp.sh)
-ALL_TEST_CASES=(mount.sh mkdir.sh touch.sh ls.sh remount.sh read.sh write.sh cp.sh)
-ALL_TEST_SCORES=(1 4 5 4 1 1 1 1)
+ALL_TEST_CASES=(mount.sh mkdir.sh touch.sh ls.sh remount.sh rw.sh cp.sh)
+ALL_TEST_SCORES=(1 4 5 4 16 2 2)
 MNTPOINT='./mnt'
 PROJECT_NAME="sfs-fuse"
+
+LEVEL=$1
+
+if [[ "${LEVEL}" == "E" ]]; then
+    echo "开始进阶功能测试"
+    TEST_CASES=(mount.sh mkdir.sh touch.sh ls.sh remount.sh rw.sh cp.sh)
+    sleep 1
+elif [[ "${LEVEL}" == "N" ]]; then
+    echo "开始普通功能测试"
+    TEST_CASES=(mount.sh mkdir.sh touch.sh ls.sh remount.sh)
+    sleep 1
+else
+    echo "未知测试参数"
+    exit 1
+fi
 
 # Helpers
 function get_bash_width() {
@@ -35,10 +50,14 @@ function core_tester() {
     PARAM=$2
     CHECK_FN=$3
     TEST_CASE=$4
+    SCORE=$5
 
     "$CMD" "$PARAM" >/dev/null
     if $CHECK_FN "$PARAM" "$TEST_CASE"; then
         pass "$TEST_CASE"
+        if [[ -n "${SCORE}" ]]; then
+            POINTS=$((POINTS + SCORE - 1))
+        fi
     fi
 }
 
@@ -90,10 +109,33 @@ function clean_mount() {
     done
 }
 
+function mkdir_and_check () {
+    DIR=$1
+    if [ ! -d "$DIR" ]; then
+        mkdir "$DIR"
+        if ! stat "$DIR" > /dev/null; then
+            fail "$TEST_CASE: 目录$DIR创建失败, 请确保能够通过mkdir测试"
+            exit
+        fi
+    fi
+}
+
+function touch_and_check () {
+    FILE=$1
+    if [ ! -f "$FILE" ]; then
+        touch "$FILE"
+        if ! stat "$FILE" > /dev/null; then
+            fail "$TEST_CASE: 文件$FILE创建失败, 请确保能够通过touch测试"
+            exit
+        fi
+    fi
+}
+
 # Test
 function register_testcase() {
     for target_test_case in "${TEST_CASES[@]}"; do
         ID=0
+        echo "测试用例: $ROOT_PATH/stages/$target_test_case"
         for test_case in "${ALL_TEST_CASES[@]}"; do
             if [[ "${test_case}" == "${target_test_case}" ]]; then
                 TOTAL_POINTS=$((TOTAL_POINTS + ALL_TEST_SCORES[ID]))
@@ -113,10 +155,6 @@ function prepare_esstential_vars() {
 
 # input: init_tester "${test_cases[@]}"
 function init_tester() {
-    if [[ -n $1 ]]; then
-        TEST_CASES=$1
-    fi
-
     register_testcase
     prepare_esstential_vars
 }
@@ -148,9 +186,9 @@ function test_end() {
 echo "测试脚本工程根目录: $ROOT_PATH"
 
 function main() {
-    init_tester "$@"
-    test_start "$@"
+    init_tester
+    test_start 
     test_end
 }
 
-main "$@"
+main

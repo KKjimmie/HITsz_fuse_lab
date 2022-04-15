@@ -34,37 +34,16 @@ function check_ls () {
     return 0
 }
 
-function mkdir_and_except () {
-    DIR=$1
-    if [ ! -d "$DIR" ]; then
-        mkdir "$DIR"
-        if ! stat "$DIR" > /dev/null; then
-            fail "$TEST_CASE: 目录$DIR创建失败, 请确保能够通过mkdir测试"
-        fi
-    fi
-}
-
-function touch_and_except () {
-    FILE=$1
-    if [ ! -f "$FILE" ]; then
-        touch "$FILE"
-        if ! stat "$FILE" > /dev/null; then
-            fail "$TEST_CASE: 文件$FILE创建失败, 请确保能够通过touch测试"
-            exit
-        fi
-    fi
-}
-
 function create_and_except () {
-    mkdir_and_except "${MNTPOINT}"/dir0
-    touch_and_except "${MNTPOINT}"/file0
-    mkdir_and_except "${MNTPOINT}"/dir0/dir1
-    mkdir_and_except "${MNTPOINT}"/dir0/dir1/dir2
-    touch_and_except "${MNTPOINT}"/dir0/dir1/dir2/file4
-    touch_and_except "${MNTPOINT}"/dir0/dir1/dir2/file5
-    touch_and_except "${MNTPOINT}"/dir0/dir1/dir2/file6
-    touch_and_except "${MNTPOINT}"/dir0/dir1/file3
-    touch_and_except "${MNTPOINT}"/dir0/file1
+    mkdir_and_check "${MNTPOINT}"/dir0
+    touch_and_check "${MNTPOINT}"/file0
+    mkdir_and_check "${MNTPOINT}"/dir0/dir1
+    mkdir_and_check "${MNTPOINT}"/dir0/dir1/dir2
+    touch_and_check "${MNTPOINT}"/dir0/dir1/dir2/file4
+    touch_and_check "${MNTPOINT}"/dir0/dir1/dir2/file5
+    touch_and_check "${MNTPOINT}"/dir0/dir1/dir2/file6
+    touch_and_check "${MNTPOINT}"/dir0/dir1/file3
+    touch_and_check "${MNTPOINT}"/dir0/file1
 }
 
 # exit

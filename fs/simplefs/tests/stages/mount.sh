@@ -2,6 +2,7 @@
 
 TEST_CASE="case 1 - mount"
 
+# eqaul to [ $? -ne 0 ]
 if ! mount_fuse; then
     fail "$TEST_CASE: mount的返回值非0"
     exit 1
