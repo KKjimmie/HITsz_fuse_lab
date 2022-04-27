@@ -5,7 +5,10 @@ TEST_CASE="case 5 - remount"
 function check_umount () {
     _PARAM=$1
     _TEST_CASE=$2
-
+    
+    sleep 1
+    sudo umount "${MNTPOINT}"
+    
     if ! check_mount; then
         return 0
     fi
@@ -23,8 +26,8 @@ GOLDEN_LAYOUT_MISMATCH=4
 function check_bm() {
     _PARAM=$1
     _TEST_CASE=$2
-    
-    python3 "$ROOT_PATH"/checkbm/checkbm.py -l /home/Programming/user-land-filesystem/fs/simplefs/include/sfs.layout -r /home/Programming/user-land-filesystem/fs/simplefs/tests/checkbm/golden-sfs.json > /dev/null
+    ROOT_PARENT_PATH=$(cd $(dirname $ROOT_PATH); pwd)
+    python3 "$ROOT_PATH"/checkbm/checkbm.py -l "$ROOT_PARENT_PATH"/include/sfs.layout -r "$ROOT_PARENT_PATH"/tests/checkbm/golden-sfs.json > /dev/null
     RET=$?
     if (( RET == ERR_OK )); then
         return 0
@@ -48,7 +51,7 @@ try_mount_or_fail
 mkdir_and_check "${MNTPOINT}/hello"
 
 TEST_CASE="case 5.1 - umount ${MNTPOINT}"
-core_tester umount "${MNTPOINT}" check_umount "$TEST_CASE"
+core_tester ls "${MNTPOINT}" check_umount "$TEST_CASE"
 
 TEST_CASE="case 5.2 - check bitmap"
 core_tester ls "${MNTPOINT}" check_bm "$TEST_CASE" 15
