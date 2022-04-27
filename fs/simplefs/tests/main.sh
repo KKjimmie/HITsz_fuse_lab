@@ -10,13 +10,30 @@ PROJECT_NAME="sfs-fuse"
 
 LEVEL=$1
 
-if [[ "${LEVEL}" == "E" ]]; then
-    echo "开始进阶功能测试"
-    TEST_CASES=(mount.sh mkdir.sh touch.sh ls.sh remount.sh rw.sh cp.sh)
+
+if [[ "${LEVEL}" == "1" ]]; then
+    echo "开始mount测试"
+    TEST_CASES=(mount.sh)
     sleep 1
-elif [[ "${LEVEL}" == "N" ]]; then
-    echo "开始普通功能测试"
+elif [[ "${LEVEL}" == "2" ]]; then
+    echo "开始mount和umount测试"
+    TEST_CASES=(mount.sh remount.sh)
+    sleep 1
+elif [[ "${LEVEL}" == "3" ]]; then
+    echo "开始mount, mkdir, touch, umount测试"
+    TEST_CASES=(mount.sh mkdir.sh touch.sh remount.sh)
+    sleep 1
+elif [[ "${LEVEL}" == "4" ]]; then
+    echo "开始mount, mkdir, touch, ls, umount测试"
     TEST_CASES=(mount.sh mkdir.sh touch.sh ls.sh remount.sh)
+    sleep 1
+elif [[ "${LEVEL}" == "5" ]]; then
+    echo "开始mount, mkdir, touch, ls, read&write, umount测试"
+    TEST_CASES=(mount.sh mkdir.sh touch.sh ls.sh remount.sh rw.sh)
+    sleep 1
+elif [[ "${LEVEL}" == "6" ]]; then
+    echo "开始mount, mkdir, touch, ls, read&write, cp, umount测试"
+    TEST_CASES=(mount.sh mkdir.sh touch.sh ls.sh remount.sh rw.sh cp.sh)
     sleep 1
 else
     echo "未知测试参数"
@@ -104,7 +121,7 @@ function clean_mount() {
         if ! check_mount; then
             break
         else
-            umount "${MNTPOINT}"
+            sudo umount "${MNTPOINT}"
         fi
     done
 }
