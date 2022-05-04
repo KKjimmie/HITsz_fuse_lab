@@ -16,12 +16,12 @@ if [[ "${LEVEL}" == "1" ]]; then
     TEST_CASES=(mount.sh)
     sleep 1
 elif [[ "${LEVEL}" == "2" ]]; then
-    echo "开始mount和umount测试"
-    TEST_CASES=(mount.sh remount.sh)
+    echo "开始mount, mkdir, touch测试"
+    TEST_CASES=(mount.sh mkdir.sh touch.sh)
     sleep 1
 elif [[ "${LEVEL}" == "3" ]]; then
-    echo "开始mount, mkdir, touch, umount测试"
-    TEST_CASES=(mount.sh mkdir.sh touch.sh remount.sh)
+    echo "开始mount, mkdir, touch, ls测试"
+    TEST_CASES=(mount.sh mkdir.sh touch.sh ls.sh)
     sleep 1
 elif [[ "${LEVEL}" == "4" ]]; then
     echo "开始mount, mkdir, touch, ls, umount测试"
