@@ -2,11 +2,11 @@
 ORIGIN_WORK_DIR=$PWD
 
 WORK_DIR=$(cd `dirname $0`; pwd)
-cd $WORK_DIR
+cd $WORK_DIR || exit
 
 MNTPOINT='./mnt'
-PROJECT_NAME="SAMPLE_PROJECT_NAME"
-ALL_POINTS=23
+PROJECT_NAME="sfs-fuse"
+ALL_POINTS=28
 POINTS=0
 
 function pass() {
@@ -27,9 +27,8 @@ function test_mount() {
     if [ $? -ne 0 ]; then
         fail $TEST_CASE
         exit 1
-    else    
-        pass $TEST_CASE
     fi
+    pass $TEST_CASE
     
     echo "<<<<<<<<<<<<<<<<<<<<"
 }
@@ -41,9 +40,9 @@ function core_tester() {
     $CMD $PARAM
     if [ $? -ne 0 ]; then
         fail $CMD $PARAM
-    else     
-        pass "-> $CMD $PARAM"
+        exit 1
     fi
+    pass "-> $CMD $PARAM"
 }
 
 function test_mkdir() {
@@ -55,6 +54,7 @@ function test_mkdir() {
     core_tester mkdir ${MNTPOINT}/dir0/dir0/dir0
     core_tester mkdir ${MNTPOINT}/dir1
 
+    pass $TEST_CASE
     
     echo "<<<<<<<<<<<<<<<<<<<<"
 }
@@ -69,6 +69,7 @@ function test_touch() {
     core_tester touch ${MNTPOINT}/dir0/dir0/dir0/file0;
     core_tester touch ${MNTPOINT}/dir1/file0;
 
+    pass $TEST_CASE
     
     echo "<<<<<<<<<<<<<<<<<<<<"
 }
@@ -83,6 +84,8 @@ function test_ls() {
     core_tester ls ${MNTPOINT}/dir0/dir0/dir0;
     core_tester ls ${MNTPOINT}/dir1;
 
+    pass $TEST_CASE
+    
     echo "<<<<<<<<<<<<<<<<<<<<"
 }
 
@@ -93,6 +96,7 @@ function test_cp() {
     cp ${MNTPOINT}/file0 ${MNTPOINT}/file1 
     if [ $? -ne 0 ]; then
         fail $TEST_CASE
+        exit 1
     fi
 
     pass $TEST_CASE
@@ -107,16 +111,16 @@ function test_remount() {
     fusermount -u ${MNTPOINT}
     if [ $? -ne 0 ]; then
         fail "umount"
-    else 
-        pass "-> fusermount -u ${MNTPOINT}"
+        exit 1
     fi
+    pass "-> fusermount -u ${MNTPOINT}"
 
     ../build/${PROJECT_NAME} --device="$HOME"/ddriver ${MNTPOINT}
     if [ $? -ne 0 ]; then
         fail "remount"
-    else 
-        pass "-> ../build/${PROJECT_NAME} --device="$HOME"/ddriver ${MNTPOINT}"
+        exit 1
     fi
+    pass "-> ../build/${PROJECT_NAME} --device=""$HOME""/ddriver ${MNTPOINT}"
     
     core_tester ls ${MNTPOINT}/;
     core_tester ls ${MNTPOINT}/dir0;
@@ -129,21 +133,28 @@ function test_remount() {
     fusermount -u ${MNTPOINT}
     if [ $? -ne 0 ]; then
         fail "umount finally"
-    else 
-        pass "-> fusermount -u ${MNTPOINT}"
+        exit 1
     fi
+    pass "-> fusermount -u ${MNTPOINT}"
+
+    pass $TEST_CASE
 
     echo "<<<<<<<<<<<<<<<<<<<<"
 }
 
 
 function test_main() {
-    ddriver -r
+    # ddriver -r
+    rm ~/ddriver -f
+    touch ~/ddriver 
+    
     test_mount "[all-the-mount-test]"
     echo ""
     test_mkdir "[all-the-mkdir-test]"
     echo ""
     test_touch "[all-the-mkdir-test]"
+    echo ""
+    test_cp "[all-the-cp-test]"
     echo ""
     test_ls "[all-the-ls-test]"
     echo ""

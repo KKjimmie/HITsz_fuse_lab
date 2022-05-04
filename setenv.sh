@@ -60,7 +60,7 @@ function generate_skeleton() {
 }
 
 function generate_test_script () {
-    sed -i "s/SAMPLE_PROJECT_NAME/${PROJECT_NAME}/g" "$WORKSPACE_NAME"/tests/fs_test.sh
+    sed -i "s/SAMPLE_PROJECT_NAME/${PROJECT_NAME}/g" "$WORKSPACE_NAME"/tests/main.sh
 }
 
 function generate_vscode () {
