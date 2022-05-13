@@ -27,7 +27,7 @@ function check_bm() {
     _PARAM=$1
     _TEST_CASE=$2
     ROOT_PARENT_PATH=$(cd $(dirname $ROOT_PATH); pwd)
-    python3 "$ROOT_PATH"/checkbm/checkbm.py -l "$ROOT_PARENT_PATH"/include/sfs.layout -r "$ROOT_PARENT_PATH"/tests/checkbm/golden-sfs.json > /dev/null
+    python3 "$ROOT_PATH"/checkbm/checkbm.py -l "$ROOT_PARENT_PATH"/include/fs.layout -r "$ROOT_PARENT_PATH"/tests/checkbm/golden.json > /dev/null
     RET=$?
     if (( RET == ERR_OK )); then
         return 0

@@ -196,6 +196,7 @@ function test_end() {
     else
         fail "再接再厉! ($POINTS/$TOTAL_POINTS)"
     fi
+    sleep 1
     clean_mount
 }
 
