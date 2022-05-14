@@ -1,18 +1,25 @@
 #!/bin/bash
-echo "----测试阶段1：mount测试"
-echo "----测试阶段2：增加 mkdir 和 touch 测试"
-echo "----测试阶段3：增加 ls 测试"
-echo "----测试阶段4：增加 umount 及 remount 测试"
-echo "----测试阶段5：增加 read 及 write 测试"
-echo "----测试阶段6：增加 copy 测试"
-read -r -p "按照你的进度输入测试等级[数字1-6]: " LEVEL 
 
+read -r -p "请输入测试方式[N(基础功能测试) / E(进阶功能测试) / S(分阶段测试)]: " TEST_METHOD
+
+rm mnt -rf
 mkdir mnt 2>/dev/null 
 
-if [[ "${LEVEL}" -ge "1" ]] && [[ "${LEVEL}" -le "6" ]]; then
-    ./main.sh "${LEVEL}"
+if [[ "${TEST_METHOD}" == "E" ]]; then
+    ./main.sh "6"
+elif [[ "${TEST_METHOD}" == "N" ]]; then
+    ./main.sh "4"
 else
-    echo "!! Wrong Test Level! Please input 1 to 6 !!"
+    echo "----测试阶段1：mount测试"
+    echo "----测试阶段2：增加 mkdir 和 touch 测试"
+    echo "----测试阶段3：增加 ls 测试"
+    echo "----测试阶段4：增加 umount 及 remount 测试"
+    echo "----测试阶段5：增加 read 及 write 测试"
+    echo "----测试阶段6：增加 copy 测试"
+    read -r -p "按照你的进度输入测试等级[数字1-6]: " LEVEL 
+    if [[ "${LEVEL}" -ge "1" ]] && [[ "${LEVEL}" -le "6" ]]; then
+        ./main.sh "${LEVEL}"
+    else
+        echo "!! Wrong Test Level! Please input 1 to 6 !!"
+    fi
 fi
-
-
