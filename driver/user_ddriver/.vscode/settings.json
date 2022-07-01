@@ -6,6 +6,7 @@
         "stdlib.h": "c",
         "ddriver.h": "c",
         "string.h": "c",
-        "errno-base.h": "c"
+        "errno-base.h": "c",
+        "pwd.h": "c"
     }
 }

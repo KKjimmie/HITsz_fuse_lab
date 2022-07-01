@@ -1,9 +1,7 @@
 #!/bin/bash
 
 cd ../../../tests/test_ddriver || exit
-cmake CMakeLists.txt
-make
-out=$(./ddriver_test)
+out=$(./compile_and_run.sh)
 if ! echo "$out" | grep "Test Pass :)"; then
     echo "-- Output:"
     echo "$out"
