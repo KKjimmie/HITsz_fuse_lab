@@ -192,8 +192,12 @@ function test_start() {
 
 function test_end() {
     if [ $POINTS -eq $TOTAL_POINTS ]; then
+        echo " "
+        echo "Score: $POINTS/$TOTAL_POINTS"
         pass "恭喜你，通过所有测试 ($TOTAL_POINTS/$TOTAL_POINTS)"
     else
+        echo " "
+        echo "Score: $POINTS/$TOTAL_POINTS"
         fail "再接再厉! ($POINTS/$TOTAL_POINTS)"
     fi
     clean_mount
