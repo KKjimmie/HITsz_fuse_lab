@@ -61,6 +61,8 @@ int   			   sfs_rmdir(const char *);
 int   			   sfs_rename(const char *, const char *);
 int   			   sfs_utimens(const char *, const struct timespec tv[2]);
 int   			   sfs_truncate(const char *, off_t);
+int 			   sfs_symlink(const char *, const char *);
+int 			   sfs_readlink(const char *, char *, size_t);
 			
 int   			   sfs_open(const char *, struct fuse_file_info *);
 int   			   sfs_opendir(const char *, struct fuse_file_info *);

@@ -28,6 +28,8 @@ static struct fuse_operations operations = {
 	.unlink = sfs_unlink,							  /* 删除文件 */
 	.rmdir	= sfs_rmdir,							  /* 删除目录， rm -r */
 	.rename = sfs_rename,							  /* 重命名，mv */
+	.readlink = sfs_readlink,						  /* 读链接 */
+	.symlink = sfs_symlink,							  /* 软链接 */
 
 	.open = sfs_open,							
 	.opendir = sfs_opendir,
@@ -185,6 +187,9 @@ int sfs_mknod(const char* path, mode_t mode, dev_t dev) {
 	else if (S_ISDIR(mode)) {
 		dentry = new_dentry(fname, SFS_DIR);
 	}
+	else {
+		dentry = new_dentry(fname, SFS_REG_FILE);
+	}
 	dentry->parent = last_dentry;
 	inode = sfs_alloc_inode(dentry);
 	sfs_alloc_dentry(last_dentry->inode, dentry);
@@ -335,6 +340,58 @@ int sfs_rename(const char* from, const char* to) {
 	
 	sfs_drop_dentry(from_dentry->parent->inode, from_dentry);
 	return ret;
+}
+/**
+ * @brief 
+ * 
+ * @param path - Where the link points
+ * @param link - The link itself
+ * @return int 
+ */
+int sfs_symlink(const char* path, const char* link){
+	boolean	is_find, is_root;
+	struct sfs_dentry* dentry = sfs_lookup(link, &is_find, &is_root);
+	if (is_find == FALSE) {
+		return -SFS_ERROR_NOTFOUND;
+	}
+	dentry->ftype = SFS_SYM_LINK;
+	struct sfs_inode* inode = dentry->inode;
+	memcpy(inode->target_path, path, SFS_MAX_FILE_NAME);
+	return SFS_ERROR_NONE;
+}
+/**
+ * @brief 
+ * 
+ * @param path 
+ * @param buf
+ * @param size 
+ * @return int 
+ */
+int sfs_readlink (const char *path, char *buf, size_t size){
+	/* SFS 暂未实现硬链接，只支持软链接 */
+	boolean	is_find, is_root;
+	ssize_t llen;
+	struct sfs_dentry* dentry = sfs_lookup(link, &is_find, &is_root);
+	if (is_find == FALSE) {
+		return -SFS_ERROR_NOTFOUND;
+	}
+	if (dentry->ftype != SFS_SYM_LINK){
+		return -SFS_ERROR_INVAL;
+	}
+	struct sfs_inode* inode = dentry->inode;
+	llen = strlen(inode->target_path);
+	if(size < 0){
+		return -SFS_ERROR_INVAL;
+	}else{
+		if(llen > size){
+			strncpy(buf, inode->target_path, size);
+			buf[size] = '\0';
+		}else{
+			strncpy(buf, inode->target_path, llen);
+			buf[llen] = '\0';
+		}
+	}
+	return SFS_ERROR_NONE;
 }
 /**
  * @brief 

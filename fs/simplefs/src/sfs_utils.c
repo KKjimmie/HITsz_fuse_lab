@@ -205,6 +205,7 @@ int sfs_sync_inode(struct sfs_inode * inode) {
     int ino             = inode->ino;
     inode_d.ino         = ino;
     inode_d.size        = inode->size;
+    memcpy(inode_d.target_path, inode->target_path, SFS_MAX_FILE_NAME);
     inode_d.ftype       = inode->dentry->ftype;
     inode_d.dir_cnt     = inode->dir_cnt;
     int offset;
@@ -302,7 +303,7 @@ int sfs_drop_inode(struct sfs_inode * inode) {
             free(dentry_to_free);
         }
     }
-    else if (SFS_IS_REG(inode)) {
+    else if (SFS_IS_REG(inode) || SFS_IS_SYM_LINK(inode)) {
         for (byte_cursor = 0; byte_cursor < SFS_BLKS_SZ(sfs_super.map_inode_blks); 
             byte_cursor++)                            /* 调整inodemap */
         {
@@ -345,6 +346,7 @@ struct sfs_inode* sfs_read_inode(struct sfs_dentry * dentry, int ino) {
     inode->dir_cnt = 0;
     inode->ino = inode_d.ino;
     inode->size = inode_d.size;
+    memcpy(inode->target_path, inode_d.target_path, SFS_MAX_FILE_NAME);
     inode->dentry = dentry;
     inode->dentrys = NULL;
     if (SFS_IS_DIR(inode)) {

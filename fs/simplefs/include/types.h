@@ -9,7 +9,8 @@ typedef uint16_t     flag16;
 
 typedef enum sfs_file_type {
     SFS_REG_FILE,
-    SFS_DIR
+    SFS_DIR,
+    SFS_SYM_LINK
 } SFS_FILE_TYPE;
 /******************************************************************************
 * SECTION: Macro
@@ -65,6 +66,7 @@ typedef enum sfs_file_type {
 
 #define SFS_IS_DIR(pinode)              (pinode->dentry->ftype == SFS_DIR)
 #define SFS_IS_REG(pinode)              (pinode->dentry->ftype == SFS_REG_FILE)
+#define SFS_IS_SYM_LINK(pinode)         (pinode->dentry->ftype == SFS_SYM_LINK)
 /******************************************************************************
 * SECTION: FS Specific Structure - In memory structure
 *******************************************************************************/
@@ -81,6 +83,7 @@ struct sfs_inode
 {
     int                ino;                           /* 在inode位图中的下标 */
     int                size;                          /* 文件已占用空间 */
+    char               target_path[SFS_MAX_FILE_NAME];/* store traget path when it is a symlink */
     int                dir_cnt;
     struct sfs_dentry* dentry;                        /* 指向该inode的dentry */
     struct sfs_dentry* dentrys;                       /* 所有目录项 */
@@ -145,6 +148,7 @@ struct sfs_inode_d
 {
     int                ino;                           /* 在inode位图中的下标 */
     int                size;                          /* 文件已占用空间 */
+    char               target_path[SFS_MAX_FILE_NAME];/* store traget path when it is a symlink */
     int                dir_cnt;
     SFS_FILE_TYPE      ftype;   
 };  
