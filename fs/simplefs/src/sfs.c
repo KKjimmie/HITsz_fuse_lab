@@ -371,7 +371,7 @@ int sfs_readlink (const char *path, char *buf, size_t size){
 	/* SFS 暂未实现硬链接，只支持软链接 */
 	boolean	is_find, is_root;
 	ssize_t llen;
-	struct sfs_dentry* dentry = sfs_lookup(link, &is_find, &is_root);
+	struct sfs_dentry* dentry = sfs_lookup(path, &is_find, &is_root);
 	if (is_find == FALSE) {
 		return -SFS_ERROR_NOTFOUND;
 	}
