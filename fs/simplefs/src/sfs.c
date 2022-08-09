@@ -108,6 +108,10 @@ int sfs_getattr(const char* path, struct stat * sfs_stat) {
 		sfs_stat->st_mode = S_IFREG | SFS_DEFAULT_PERM;
 		sfs_stat->st_size = dentry->inode->size;
 	}
+	else if (SFS_IS_SYM_LINK(dentry->inode)) {
+		sfs_stat->st_mode = S_IFLNK | SFS_DEFAULT_PERM;
+		sfs_stat->st_size = dentry->inode->size;
+	}
 
 	sfs_stat->st_nlink = 1;
 	sfs_stat->st_uid 	 = getuid();
@@ -349,7 +353,9 @@ int sfs_rename(const char* from, const char* to) {
  * @return int 
  */
 int sfs_symlink(const char* path, const char* link){
+	int ret = SFS_ERROR_NONE;
 	boolean	is_find, is_root;
+	ret = sfs_mknod(link, S_IFREG, NULL);
 	struct sfs_dentry* dentry = sfs_lookup(link, &is_find, &is_root);
 	if (is_find == FALSE) {
 		return -SFS_ERROR_NOTFOUND;
@@ -357,7 +363,7 @@ int sfs_symlink(const char* path, const char* link){
 	dentry->ftype = SFS_SYM_LINK;
 	struct sfs_inode* inode = dentry->inode;
 	memcpy(inode->target_path, path, SFS_MAX_FILE_NAME);
-	return SFS_ERROR_NONE;
+	return ret;
 }
 /**
  * @brief 
