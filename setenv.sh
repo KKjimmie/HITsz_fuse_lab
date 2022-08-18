@@ -11,7 +11,12 @@ function install_driver() {
     current_user=$(whoami)
     # 测试是否有SUDO权限
     if [ "$current_user" != "root" ]; then
-        has_root_permission=$(sudo -l -U "$current_user" | grep "(root) ALL")
+        has_root_permission=1
+        
+        if sudo echo 1; then
+            has_root_permission=0
+        fi
+        
         if [ -n "$has_root_permission" ]; then
             if command -v apt-get > /dev/null 2>&1; then
                 echo "> apt install"
