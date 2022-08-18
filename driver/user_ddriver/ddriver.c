@@ -141,7 +141,7 @@ int ddriver_open(char *path) {
         fd = open(device_path, O_RDWR);
     }
     else {
-        fd = open(device_path, O_CREAT | O_TRUNC | O_RDWR);
+        fd = open(device_path, O_CREAT | O_TRUNC | O_RDWR, 0644);
     }
     if (fd < 0) {
         user_panic("can't open device: %d", fd);
