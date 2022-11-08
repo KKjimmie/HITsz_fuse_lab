@@ -1,0 +1,9 @@
+{
+    "checks": [
+        "super",
+        "data_map",
+        "inode_map"
+    ],
+    "valid_inode": 2,
+    "valid_data": 1
+}
