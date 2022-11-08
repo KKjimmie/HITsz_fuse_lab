@@ -17,6 +17,8 @@ function install_driver() {
             has_root_permission=0
         fi
         
+        echo "Whether you have sudo permission: $has_root_permission"
+
         if [ -n "$has_root_permission" ]; then
             if command -v apt-get > /dev/null 2>&1; then
                 echo "> apt install"
