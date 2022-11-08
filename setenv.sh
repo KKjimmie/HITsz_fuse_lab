@@ -19,7 +19,7 @@ function install_driver() {
         
         echo "Whether you have sudo permission: $has_root_permission"
 
-        if [ -n "$has_root_permission" ]; then
+        if [ "$has_root_permission" -eq 1 ]; then
             if command -v apt-get > /dev/null 2>&1; then
                 echo "> apt install"
                 sudo apt-get install make cmake fuse libfuse-dev
