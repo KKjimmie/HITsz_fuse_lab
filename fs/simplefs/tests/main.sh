@@ -121,7 +121,8 @@ function clean_mount() {
         if ! check_mount; then
             break
         else
-            sudo umount "${MNTPOINT}"
+            # sudo umount "${MNTPOINT}"
+            umount "${MNTPOINT}"
         fi
     done
 }

@@ -5,7 +5,7 @@ WORK_DIR=$(cd `dirname $0`; pwd)
 cd $WORK_DIR || exit
 
 MNTPOINT='./mnt'
-PROJECT_NAME="sfs-fuse"
+PROJECT_NAME="SAMPLE_PROJECT_NAME"
 ALL_POINTS=28
 POINTS=0
 

@@ -7,7 +7,8 @@ function check_umount () {
     _TEST_CASE=$2
     
     sleep 1
-    sudo umount "${MNTPOINT}"
+    # sudo umount "${MNTPOINT}"
+    umount "${MNTPOINT}"
     
     if ! check_mount; then
         return 0
