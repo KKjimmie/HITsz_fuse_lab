@@ -11,9 +11,9 @@ function install_driver() {
     current_user=$(whoami)
     # 测试是否有SUDO权限
     if [ "$current_user" != "root" ]; then
-        has_root_permission=1
-        
-        if sudo echo 1; then
+        if sudo -v &>/dev/null; then
+            has_root_permission=1
+        else
             has_root_permission=0
         fi
         
