@@ -198,8 +198,8 @@ with open(ddriver, "rb") as f:
             exit(INODE_MAP_ERR)
     if is_check_data_map:
         res2 = check_map(f, data_map_ofs, data_map_blks, valid_data)
-        if not res2:
-            sys.stderr.write("数据位图错误, 期望值: %d个有效位, 实际值: %d个有效位" % (res1[2], res1[1]))
+        if not res2[0]:
+            sys.stderr.write("数据位图错误, 期望值: %d个有效位, 实际值: %d个有效位" % (res2[2], res2[1]))
             exit(DATA_MAP_ERR)
     exit(ERR_OK)
 

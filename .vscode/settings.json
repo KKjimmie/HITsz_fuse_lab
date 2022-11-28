@@ -3,6 +3,9 @@
         "*.cjson": "jsonc",
         "*.wxss": "css",
         "*.wxs": "javascript",
-        "ioctl.h": "c"
+        "ioctl.h": "c",
+        "sfs.h": "c",
+        "ddriver.h": "c",
+        "errno.h": "c"
     }
 }
