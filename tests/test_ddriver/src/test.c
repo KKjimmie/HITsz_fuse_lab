@@ -5,7 +5,7 @@ int main(int argc, char const *argv[])
 {
     int size;
     struct ddriver_state state;
-    int fd = ddriver_open("ddriver");
+    int fd = ddriver_open("/home/kjm/ddriver");
     if (fd < 0) {
         return -1;
     }
@@ -17,11 +17,13 @@ int main(int argc, char const *argv[])
         return fd;
     }
     ddriver_write(fd, buffer, 512);
+    // 文件指针指到文件开头位置，SEEK_SET: 设置文件指针偏移为 offset
     ddriver_seek(fd, 0, SEEK_SET);
     ddriver_read(fd, rbuffer, 512);
     printf("%s\n", rbuffer);
 
     /* Cycle 2: ioctl test - return int */
+    // ioctl是设备驱动程序中对设备的I/O通道进行管理的函数
     ddriver_ioctl(fd, IOC_REQ_DEVICE_SIZE, &size);
     printf("%d\n", size);
 
@@ -32,6 +34,7 @@ int main(int argc, char const *argv[])
     printf("seek_cnt: %d\n", state.seek_cnt);
 
     /* Cycle 4: ioctl test - re-init device */
+    // 重置
     ddriver_ioctl(fd, IOC_REQ_DEVICE_RESET, &size);
 
     ddriver_ioctl(fd, IOC_REQ_DEVICE_SIZE, &size);
