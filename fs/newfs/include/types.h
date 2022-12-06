@@ -113,6 +113,7 @@ struct nfs_inode {
     struct nfs_dentry*      dentrys;              // 所有目录项  
     uint8_t*                data;
     int                     block_pointer[6];     // 数据块指针（可固定分配）
+    int                     block_allocated;      // 已分配数据块
 };
 
 struct nfs_dentry {
@@ -155,6 +156,7 @@ struct nfs_inode_d
     NFS_FILE_TYPE      ftype;              // 文件类型（目录类型、普通文件类型）
     int                dir_cnt;            // 如果是目录类型文件，下面有几个目录项
     int                block_pointer[6];   // 数据块指针（可固定分配）
+    int                block_allocated;    // 已分配数据块个数
 };  
 
 struct nfs_dentry_d

@@ -125,6 +125,7 @@ int nfs_driver_write(int offset, uint8_t *in_content, int size) {
 
 /**
  * @brief 分配一个inode，占用位图
+ * 实现数据块的动态分配：创建 inode 时，只分配一个数据块，后续根据 size 再分配
  * 
  * @param dentry 该dentry指向分配的inode
  * @return nfs_inode
@@ -160,7 +161,6 @@ struct nfs_inode* nfs_alloc_inode(struct nfs_dentry * dentry) {
 
     inode = (struct nfs_inode*)malloc(sizeof(struct nfs_inode));
     inode->ino  = ino_cursor; 
-    printf("ino_cursor :%d", ino_cursor);
     inode->size = 0;
                                                       /* dentry指向inode */
     dentry->inode = inode;
@@ -170,12 +170,21 @@ struct nfs_inode* nfs_alloc_inode(struct nfs_dentry * dentry) {
     
     inode->dir_cnt = 0;
     inode->dentrys = NULL;
+    inode->block_allocated = 0;
     
-    // 从 data bitmap 分配
-    for(int i = 0; i < NFS_DATA_PER_FILE; i ++) {
-        inode->block_pointer[i] = nfs_alloc_data();
-    }
 
+    /**
+     * 不再预分配，而是按需分配。
+    */
+    // 从 data bitmap 分配
+    // 新建 inode 时只分配一个
+    // inode->block_pointer[0] = nfs_alloc_data();
+    // inode->block_allocated = 1;
+    // for(int i = 1; i < NFS_DATA_PER_FILE; i ++) {
+    //     inode->block_pointer[i] = -1;
+    // }
+
+    // 文件类型分配内存
     if (NFS_IS_REG(inode)) {
         inode->data = (uint8_t *)malloc(NFS_BLKS_SZ(NFS_DATA_PER_FILE));
     }
@@ -185,7 +194,7 @@ struct nfs_inode* nfs_alloc_inode(struct nfs_dentry * dentry) {
 
 /**
  * @brief 分配一个数据块
- * @return 返回 data_cursor
+ * @return 返回数据块号
 */
 int nfs_alloc_data(){
     int byte_cursor = 0; 
@@ -232,6 +241,7 @@ int nfs_sync_inode(struct nfs_inode * inode) {
     inode_d.size        = inode->size;
     inode_d.ftype       = inode->dentry->ftype;
     inode_d.dir_cnt     = inode->dir_cnt;
+    inode_d.block_allocated = inode->block_allocated;
     int offset;
 
     for (int i = 0; i < NFS_DATA_PER_FILE; ++i) {
@@ -248,7 +258,7 @@ int nfs_sync_inode(struct nfs_inode * inode) {
         // 如果是目录类型
         // 将目录项存到 data block 中
         dentry_cursor = inode->dentrys;
-        while (dentry_cursor != NULL && blk_no < NFS_DATA_PER_FILE) {
+        while (dentry_cursor != NULL && blk_no < inode->block_allocated) {
             offset = NFS_DATA_OFS(inode_d.block_pointer[blk_no]);
             while (dentry_cursor != NULL)
             {
@@ -276,7 +286,10 @@ int nfs_sync_inode(struct nfs_inode * inode) {
     else if (NFS_IS_REG(inode)) {
         // 如果是文件类型，一块一块地写入
         tmp_data = inode->data;
-        for (int i = 0; i < NFS_DATA_PER_FILE; ++i) {
+        for (int i = 0; i < inode->block_allocated; ++i) {
+            if (inode_d.block_pointer[i] < 0) {
+                break;
+            }
             if (nfs_driver_write(NFS_DATA_OFS(inode_d.block_pointer[i]), tmp_data, 
                                 NFS_BLK_SZ()) != 0) {
                 return -NFS_ERROR_IO;
@@ -302,6 +315,11 @@ int nfs_alloc_dentry(struct nfs_inode* inode, struct nfs_dentry* dentry) {
         inode->dentrys = dentry;
     }
     inode->dir_cnt++;
+    inode->size += sizeof(struct nfs_dentry_d);
+    if (NFS_ROUND_UP((inode->dir_cnt) * sizeof(struct nfs_dentry_d), NFS_BLK_SZ()) > NFS_BLKS_SZ(inode->block_allocated)) {
+        inode->block_pointer[inode->block_allocated] = nfs_alloc_data();
+        inode->block_allocated++;
+    }
     return inode->dir_cnt;
 }
 /**
@@ -317,24 +335,31 @@ struct nfs_inode* nfs_read_inode(struct nfs_dentry * dentry, int ino) {
     struct nfs_dentry* sub_dentry;
     struct nfs_dentry_d dentry_d;
     int    dir_cnt = 0, i;
+    int    size = 0, blk_no = 0;
     if (nfs_driver_read(NFS_INO_OFS(ino), (uint8_t *)&inode_d, 
                         sizeof(struct nfs_inode_d)) != 0) {
         NFS_DBG("[%s] io error\n", __func__);
         return NULL;                    
     }
-    inode->dir_cnt = 0;
+    inode->dir_cnt = inode_d.dir_cnt;
     inode->ino = inode_d.ino;
     inode->size = inode_d.size;
     inode->dentry = dentry;
     inode->dentrys = NULL;
+    inode->block_allocated = inode_d.block_allocated;
     if (NFS_IS_DIR(inode)) {
         dir_cnt = inode_d.dir_cnt;
-        for (i = 0; i < dir_cnt; i++)
+        for (i = 0; i < dir_cnt && inode_d.block_pointer[blk_no] >= 0; i++)
         {
-            if (nfs_driver_read(NFS_DATA_OFS(inode_d.block_pointer[0]) + i * sizeof(struct nfs_dentry_d), 
+            if (nfs_driver_read(NFS_DATA_OFS(inode_d.block_pointer[blk_no]) + i * sizeof(struct nfs_dentry_d), 
                                 (uint8_t *)&dentry_d, 
                                 sizeof(struct nfs_dentry_d)) != 0) {
                 return NULL;                    
+            }
+            size += sizeof(struct nfs_dentry_d);
+            if (size + sizeof(struct nfs_dentry_d) > NFS_BLK_SZ()) {
+                blk_no += 1;
+                size = 0;
             }
             sub_dentry = new_dentry(dentry_d.fname, dentry_d.ftype);
             sub_dentry->parent = inode->dentry;
@@ -346,6 +371,9 @@ struct nfs_inode* nfs_read_inode(struct nfs_dentry * dentry, int ino) {
         inode->data = (uint8_t *)malloc(NFS_BLKS_SZ(NFS_DATA_PER_FILE));
         uint8_t *tmp_data = inode->data;
         for (int i = 0; i < NFS_DATA_PER_FILE; ++i) {
+            if (inode_d.block_pointer[i] < 0) {
+                break;
+            }
             if (nfs_driver_read(NFS_DATA_OFS(inode_d.block_pointer[i]), (uint8_t *)tmp_data, 
                             NFS_BLK_SZ()) != 0) {
                 NFS_DBG("[%s] io error\n", __func__);
@@ -621,32 +649,3 @@ struct nfs_dentry* nfs_lookup(const char * path, int* is_find, int* is_root) {
     
     return dentry_ret;
 }
-
-// void sfs_dump_map() {
-//     int byte_cursor = 0;
-//     int bit_cursor = 0;
-
-//     for (byte_cursor = 0; byte_cursor < SFS_BLKS_SZ(nfs_super.map_inode_blks); 
-//          byte_cursor+=4)
-//     {
-//         for (bit_cursor = 0; bit_cursor < UINT8_BITS; bit_cursor++) {
-//             printf("%d ", (nfs_super.map_inode[byte_cursor] & (0x1 << bit_cursor)) >> bit_cursor);   
-//         }
-//         printf("\t");
-
-//         for (bit_cursor = 0; bit_cursor < UINT8_BITS; bit_cursor++) {
-//             printf("%d ", (nfs_super.map_inode[byte_cursor + 1] & (0x1 << bit_cursor)) >> bit_cursor);   
-//         }
-//         printf("\t");
-        
-//         for (bit_cursor = 0; bit_cursor < UINT8_BITS; bit_cursor++) {
-//             printf("%d ", (nfs_super.map_inode[byte_cursor + 2] & (0x1 << bit_cursor)) >> bit_cursor);   
-//         }
-//         printf("\t");
-        
-//         for (bit_cursor = 0; bit_cursor < UINT8_BITS; bit_cursor++) {
-//             printf("%d ", (nfs_super.map_inode[byte_cursor + 3] & (0x1 << bit_cursor)) >> bit_cursor);   
-//         }
-//         printf("\n");
-//     }
-// }

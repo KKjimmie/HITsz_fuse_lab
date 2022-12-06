@@ -272,6 +272,15 @@ int nfs_write(const char* path, const char* buf, size_t size, off_t offset,
 
 	memcpy(inode->data + offset, buf, size);
 	inode->size = offset + size > inode->size ? offset + size : inode->size;
+	// 数据块的按需分配
+	if (inode->size >= NFS_BLKS_SZ(inode->block_allocated)) {
+		if (inode->block_allocated < NFS_DATA_PER_FILE) {
+			inode->block_pointer[inode->block_allocated] = nfs_alloc_data();
+			inode->block_allocated ++;
+		} else {
+			return -NFS_ERROR_NOSPACE;
+		}
+	}
 	
 	return size;
 }
