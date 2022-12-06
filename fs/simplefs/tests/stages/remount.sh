@@ -54,5 +54,7 @@ mkdir_and_check "${MNTPOINT}/hello"
 TEST_CASE="case 5.1 - umount ${MNTPOINT}"
 core_tester ls "${MNTPOINT}" check_umount "$TEST_CASE"
 
+sleep 1
+
 TEST_CASE="case 5.2 - check bitmap"
 core_tester ls "${MNTPOINT}" check_bm "$TEST_CASE" 15
