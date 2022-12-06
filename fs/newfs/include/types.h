@@ -113,6 +113,7 @@ struct nfs_inode {
     struct nfs_dentry*      dentrys;              // 所有目录项  
     uint8_t*                data;
     int                     block_pointer[6];     // 数据块指针（可固定分配）
+    int                     dirty[6];             // 数据块脏位
     int                     block_allocated;      // 已分配数据块
 };
 

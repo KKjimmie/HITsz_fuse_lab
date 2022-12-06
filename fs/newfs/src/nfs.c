@@ -269,11 +269,19 @@ int nfs_write(const char* path, const char* buf, size_t size, off_t offset,
 	if (inode->size < offset) {
 		return -NFS_ERROR_SEEK;
 	}
-
 	memcpy(inode->data + offset, buf, size);
 	inode->size = offset + size > inode->size ? offset + size : inode->size;
+
+	int begin_block = (int)(NFS_ROUND_DOWN(offset, NFS_BLK_SZ())/NFS_BLK_SZ());
+	int end_block = (int)(NFS_ROUND_UP(offset + size, NFS_BLK_SZ())/NFS_BLK_SZ());
+
+	// 标记脏位
+	for(int i = begin_block; i < end_block && i < NFS_DATA_PER_FILE; ++i) {
+		inode->dirty[i] = 1;
+	}
+
 	// 数据块的按需分配
-	if (inode->size >= NFS_BLKS_SZ(inode->block_allocated)) {
+	while (inode->size >= NFS_BLKS_SZ(inode->block_allocated)) {
 		if (inode->block_allocated < NFS_DATA_PER_FILE) {
 			inode->block_pointer[inode->block_allocated] = nfs_alloc_data();
 			inode->block_allocated ++;
